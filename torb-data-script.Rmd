@@ -1,0 +1,123 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(jsonlite)
+```
+
+List of 50 Torbjorn players, using the most played list at https://masteroverwatch.com/leaderboards/pc/us/hero/14/mode/ranked/category/time
+
+```{r}
+list.names <- c(
+                "highapm123-1271", 
+                "Cee-11450",
+                "NoHit-11397", 
+                "Fuey500-1558",
+                "CANTHEARYOU-11687",
+                "sKepTiCal404-1795",
+                "TORBONLY-1944",
+                "Keiran-1378",
+                "NinjaChicken-11437",
+                "Biodrone-11449",
+                "Zhecare-11886",
+                "RUSTY-12430",
+                "S00K-1461",
+                "NKPCBANG1894-1403",
+                "JangBahadur-1968",
+                "Nothingg-11382",
+                "Wabooz-1229",
+                "Bubba-13251",
+                "Desth-1259",
+                "LavenderFart-1437",
+                "LunarRemix-1662",
+                "Starcadian-11724",
+                "KingTorb-1911",
+                "PyroTorb-1752",
+                "Kubanacan-1908",
+                "Jay-12173",
+                "Desth-1259",
+                "snoddog-1197",
+                "AmazinDrDino-11465",
+                "Reus-12233",
+                "Bubby-1168",
+                "MailorSoon-1516",
+                "Dwreck-11265",
+                "TPphonehome-1439",
+                "Emotions-11986",
+                "ApexEndeavor-1489",
+                "GetGames-1743",
+                "TorbOnlyPro-1655",
+                "BuildATurret-1128",
+                "Hanzowned-1779",
+                "Torbo-11815",
+                "Kruw-1216",
+                "Chimay-31881",
+                "CatAlien-1282",
+                "Daffy-11338",
+                "MightyAnnie-11234",
+                "RinBear-1340",
+                "Paix-21642",
+                "Eternal-1994"
+                )
+
+               # "KheeKhwaiHom-1898",
+```
+
+Intializating the objects in which we will sort the data before transfering them into data frames.
+
+
+```{r}
+stat = list()
+
+for(i in 1:length(list.names)){
+  url.stat = paste0("https://owapi.net/api/v3/u/",list.names[i],"/stats", sep="")
+   json.stat <- fromJSON(url.stat, flatten = TRUE)
+  stat[[i+1]] <- data.frame(sr = json.stat$us$stats$competitive$overall_stats)
+  Sys.sleep(5)
+}
+
+```
+
+Downloading the data
+```{r}
+avg = list()
+hero = list()
+general = list()
+
+#Takes each player name and turns it into a URL from which we can get the a JSON file using owapi.net
+for (i in 1:length(list.names)){
+
+#Modify the URL  
+  url.hero = paste0("https://owapi.net/api/v3/u/",list.names[i],"/heroes", sep="")
+#JSON using the URL   
+json.hero <- fromJSON(url.hero, flatten = TRUE)
+  avg[[i+1]] <- data.frame(json.hero$us$heroes$stats$competitive$torbjorn$average_stats)
+  hero[[i+1]]<- data.frame(json.hero$us$heroes$stats$competitive$torbjorn$hero_stats)
+  general[[i+1]]<- data.frame(json.hero$us$heroes$stats$competitive$torbjorn$general_stats)
+}
+
+```
+
+
+
+```{r}
+df.avg <- rbind.pages(avg)
+  df.hero <- rbind.pages(hero)
+  df.general <- rbind.pages(general)
+  df.stat <- rbind.pages(stat)
+  
+
+  
+
+```
+
+```{r}
+write.csv(df.avg, file="torbavg.csv")
+write.csv(df.general, file="general.csv") 
+write.csv(df.hero, file="hero.csv")
+write.csv(df.stat, file="stat.csv")
+```
+
+
